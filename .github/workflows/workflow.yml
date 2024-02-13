@@ -5,22 +5,23 @@ on: [push, pull_request]
 jobs:
   codecov:
     runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.11'
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: '2'
 
-      - name: Setup Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Setup Python
+        uses: actions/setup-python@v3
         with:
-          auto-update-conda: true
-          python-version: '3.11'
-          environment-file: environment.yml
-          activate-environment: ci-env
+          python-version: ${{ env.PYTHON }}
 
       - name: Install Dependencies
         run: |
-          conda install --file requirements.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Generate Report
         run: |
@@ -39,19 +40,22 @@ jobs:
 
   pylint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
         with:
-          auto-update-conda: true
-          python-version: '3.11'
-          environment-file: environment.yml
-          activate-environment: ci-env
+          python-version: ${{ matrix.python-version }}
 
-      - name: Code Review Scoring
-        run: find . -name '*.py' -print -exec pylint {} \;
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: Analysing code with PyLint
         run: |
           pylint $(find . -path ./tests -prune -o -name '*.py' -print) --fail-under=8.0
