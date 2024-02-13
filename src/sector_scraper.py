@@ -8,23 +8,6 @@ logging to facilitate debugging and monitoring of the scraping process.
 
 The module sets up basic logging configuration upon import, ensuring that log messages are
 appropriately formatted and logged to the console during execution.
-
-Classes:
-    SectorScraper: A class for scraping sector data from a website and returning it as a pandas DataFrame.
-
-Functions:
-    setup_logging(): Sets up basic logging configuration for the module.
-
-Dependencies:
-    - logging: Standard Python logging module for logging messages.
-    - requests: Third-party library for making HTTP requests.
-    - pandas: Third-party library providing high-performance, easy-to-use data structures.
-    - BeautifulSoup (from bs4): Third-party library for parsing HTML and XML documents.
-
-Example:
-    scraper = SectorScraper("http://example.com/sectors")
-    sector_data_df = scraper.fetch_sectors_data()
-    print(sector_data_df)
 """
 
 import logging
@@ -68,21 +51,26 @@ class SectorScraper:
         :raises IndexError: If an error occurs while parsing the response content.
         :raises Exception: If an error occurs while parsing the response content.
         """
-        # Send a GET request to the URL
-        response = requests.get(url=self.url)
+        # Define a reasonable timeout for the request (e.g., 10 seconds)
+        request_timeout = 10
 
-        # If the response status code is not 200 (OK), log an error and return an empty DataFrame
+        # Send a GET request to the URL with the specified timeout
+        try:
+            response = requests.get(url=self.url, timeout=request_timeout)
+        except requests.RequestException as e:
+            logging.error("Request to %s failed due to an exception: %s", self.url, e)
+            return pd.DataFrame()
+
+        # Check if the response status code is not 200 (OK), log an error and return an empty DataFrame
         if response.status_code != 200:
-            logging.error("Failed to retrieve data from %s }", self.url)
+            logging.error("Failed to retrieve data from %s", self.url)
             return pd.DataFrame()
 
         # Parse the response content with BeautifulSoup
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Find all div elements with class 'col-sm-4'
+        # Extract the sector title and report count for each relevant div element
         sector_divs = soup.find_all('div', class_='col-sm-4')
-
-        # For each div element, extract the sector title and report count and append them to the sectors data
         for business_div in sector_divs:
             sector_title_div = business_div.find('div', class_='SectorTitle')
             report_count_div = business_div.find('div', class_='ReportCount')
@@ -92,6 +80,5 @@ class SectorScraper:
                 report_count = int(report_count_div.text.split()[0])
                 self.sectors_data.append({"SECTOR": sector_title, "REPORT_COUNT": report_count})
 
-        # Log a success message and return a DataFrame containing the sectors data
         logging.info("Sectors data successfully fetched from %s and parsed.", self.url)
         return pd.DataFrame(self.sectors_data)

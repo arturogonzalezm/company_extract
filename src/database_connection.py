@@ -47,6 +47,6 @@ class DatabaseConnection:
                 logging.info("New database connection created.")
             except sqlite3.Error as error:
                 cls._connection = None  # Ensure that _connection is reset in case of failure
-                logging.error(f"Failed to create database connection: {error}")
+                logging.error("Failed to create database connection %s: %s", "db/companies.db", error)
                 raise  # Optionally, re-raise the exception to be handled by the caller
         return cls._connection
