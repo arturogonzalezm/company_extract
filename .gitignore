@@ -1,0 +1,15 @@
+.idea/*
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/gradle.xml
+.idea/gradle.settings.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/
+config.xml
+.idea/profiles_settings.xml
+.idea/inspectionProfiles
+.idea/externalLibraries
+.idea/Project_Default.xml

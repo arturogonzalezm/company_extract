@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+pysqlite3
+pandas
+pyarrow
+pytest
