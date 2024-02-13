@@ -73,7 +73,7 @@ class SectorScraper:
 
         # If the response status code is not 200 (OK), log an error and return an empty DataFrame
         if response.status_code != 200:
-            logging.error(f"Failed to retrieve data from {self.url}")
+            logging.error("Failed to retrieve data from %s }", self.url)
             return pd.DataFrame()
 
         # Parse the response content with BeautifulSoup
@@ -93,5 +93,5 @@ class SectorScraper:
                 self.sectors_data.append({"SECTOR": sector_title, "REPORT_COUNT": report_count})
 
         # Log a success message and return a DataFrame containing the sectors data
-        logging.info(f"Sectors data successfully fetched from {self.url}")
+        logging.info("Sectors data successfully fetched from %s and parsed.", self.url)
         return pd.DataFrame(self.sectors_data)

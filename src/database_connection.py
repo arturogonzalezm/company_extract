@@ -4,7 +4,6 @@ database connections. It ensures that only one connection is active at a time
 and provides a consistent interface for fetching the current database connection.
 """
 
-
 import sqlite3
 import logging
 
