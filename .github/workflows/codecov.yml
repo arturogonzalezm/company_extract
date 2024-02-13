@@ -1,0 +1,39 @@
+name: CodeCov
+
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.11'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '2'
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate Report
+        run: |
+          pip install coverage pytest-cov
+          coverage run -m pytest
+          coverage report
+          coverage xml
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests  # Optional
+          name: codecov-umbrella  # Optional
+          fail_ci_if_error: true  # Optional
