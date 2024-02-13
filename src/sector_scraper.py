@@ -1,3 +1,32 @@
+"""
+This module contains the SectorScraper class for scraping sector data from a specified URL.
+
+The SectorScraper class is designed to fetch sector-specific information from a given webpage,
+parse the fetched HTML content to extract relevant data using BeautifulSoup, and return the
+data in a structured pandas DataFrame format. The class supports handling HTTP errors and
+logging to facilitate debugging and monitoring of the scraping process.
+
+The module sets up basic logging configuration upon import, ensuring that log messages are
+appropriately formatted and logged to the console during execution.
+
+Classes:
+    SectorScraper: A class for scraping sector data from a website and returning it as a pandas DataFrame.
+
+Functions:
+    setup_logging(): Sets up basic logging configuration for the module.
+
+Dependencies:
+    - logging: Standard Python logging module for logging messages.
+    - requests: Third-party library for making HTTP requests.
+    - pandas: Third-party library providing high-performance, easy-to-use data structures.
+    - BeautifulSoup (from bs4): Third-party library for parsing HTML and XML documents.
+
+Example:
+    scraper = SectorScraper("http://example.com/sectors")
+    sector_data_df = scraper.fetch_sectors_data()
+    print(sector_data_df)
+"""
+
 import logging
 import requests
 import pandas as pd
@@ -12,30 +41,32 @@ setup_logging()
 class SectorScraper:
     """
     Class for scraping sector data from a website.
-
-    This class uses the BeautifulSoup library to scrape sector data from a given URL.
-    The scraped data is stored in a pandas DataFrame and can be retrieved using the fetch_sectors_data method.
+    :param url: The URL to scrape.
+    :type url: str
+    :return: None
     """
 
     def __init__(self, url):
         """
         Initialize the SectorScraper with the URL to scrape.
-
-        Args:
-            url (str): The URL to scrape.
+        :param url: The URL to scrape.
+        :type url: str
+        :return: None
         """
         self.url = url
         self.sectors_data = []
 
     def fetch_sectors_data(self):
         """
-        Fetch the sectors data from the URL.
-
-        This method sends a GET request to the URL and parses the response content with BeautifulSoup.
-        It then extracts the sector data from the parsed content and stores it in a pandas DataFrame.
-
-        Returns:
-            A pandas DataFrame containing the sectors data, or an empty DataFrame if an error occurred.
+        Fetch sector data from the website and return it as a DataFrame.
+        :return: The sector data.
+        :rtype: pd.DataFrame
+        :raises requests.RequestException: If an error occurs while fetching the data.
+        :raises ValueError: If the response status code is not 200 (OK).
+        :raises AttributeError: If an error occurs while parsing the response content.
+        :raises TypeError: If an error occurs while parsing the response content.
+        :raises IndexError: If an error occurs while parsing the response content.
+        :raises Exception: If an error occurs while parsing the response content.
         """
         # Send a GET request to the URL
         response = requests.get(url=self.url)

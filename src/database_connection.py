@@ -1,12 +1,23 @@
+"""
+This module provides a singleton DatabaseConnection class for managing
+database connections. It ensures that only one connection is active at a time
+and provides a consistent interface for fetching the current database connection.
+"""
+
+
 import sqlite3
+import logging
+
+from src.log_config import setup_logging
+
+setup_logging()
 
 
 class DatabaseConnection:
     """
-    Singleton class for managing a SQLite database connection.
-
-    This class ensures that only one database connection is active at a time.
-    The connection is established when get_connection() is called for the first time.
+    Singleton class for managing database connections.
+    :cvar _instance: The instance of the class.
+    :cvar _connection: The database connection.
     """
 
     _instance = None
@@ -14,25 +25,29 @@ class DatabaseConnection:
 
     def __new__(cls):
         """
-        Override the __new__ method to implement the Singleton pattern.
-
-        This method ensures that only one instance of DatabaseConnection exists.
-        If an instance already exists, it returns that instance.
-        If not, it creates a new instance and initializes the _connection attribute to None.
+        Create a new instance of the class if it does not exist.
+        :return: The instance of the class.
+        :rtype: DatabaseConnection
         """
         if cls._instance is None:
             cls._instance = super(DatabaseConnection, cls).__new__(cls)
             cls._connection = None  # Ensure connection is initialized here or in get_connection
+            logging.info("DatabaseConnection instance created.")
         return cls._instance
 
     @classmethod
     def get_connection(cls):
         """
-        Get the active database connection.
-
-        If a connection does not exist, it creates a new connection to the SQLite database.
-        The database file is located at "db/companies.db".
+        Get the current database connection. If no connection exists, create a new one.
+        :return: The database connection.
+        :rtype: sqlite3.Connection
         """
         if cls._connection is None:
-            cls._connection = sqlite3.connect("db/companies.db")  # This should be caught by the mock
+            try:
+                cls._connection = sqlite3.connect("db/companies.db")
+                logging.info("New database connection created.")
+            except sqlite3.Error as error:
+                cls._connection = None  # Ensure that _connection is reset in case of failure
+                logging.error(f"Failed to create database connection: {error}")
+                raise  # Optionally, re-raise the exception to be handled by the caller
         return cls._connection
