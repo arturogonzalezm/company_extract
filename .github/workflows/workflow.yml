@@ -56,6 +56,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Code Review Scoring
+        run: find . -path ./tests -prune -o -name '*.py' -print -exec pylint {} \;
       - name: Analysing code with PyLint
         run: |
           pylint $(find . -path ./tests -prune -o -name '*.py' -print) --fail-under=8.0
