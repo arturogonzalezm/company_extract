@@ -3,61 +3,69 @@ name: Python CI
 on: [push, pull_request]
 
 jobs:
-  codecov:
-    runs-on: ubuntu-latest
-    env:
-      OS: ubuntu-latest
-      PYTHON: '3.11'
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: '2'
-
-      - name: Setup Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ env.PYTHON }}
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Generate Report
-        run: |
-          pip install coverage pytest-cov
-          coverage run -m pytest
-          coverage report
-          coverage xml
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          flags: unittests  # Optional
-          name: codecov-umbrella  # Optional
-          fail_ci_if_error: true  # Optional
-
-  pylint:
+  setup-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [ "3.11" ]
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: '2'
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Cache Python packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Generate and Upload Coverage Report
+        run: |
+          pip install coverage pytest-cov
+          coverage run -m pytest
+          coverage report
+          coverage xml
+          codecov -t ${{ secrets.CODECOV_TOKEN }} --file ./coverage.xml
+
+  lint:
+    needs: setup-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+
+      - name: Cache Python packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+
       - name: Code Review Scoring
         run: find . -path ./tests -prune -o -name '*.py' -print -exec pylint {} \;
-      - name: Analysing code with PyLint
+
+      - name: Run PyLint
         run: |
-          pylint $(find . -path ./tests -prune -o -name '*.py' -print) --fail-under=8.0
+          pylint $(git ls-files '*.py' ':!:./tests/*')
