@@ -4,3 +4,4 @@ pysqlite3
 pandas
 pyarrow
 pytest
+pylint
