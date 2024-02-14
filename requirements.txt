@@ -6,3 +6,5 @@ pyarrow
 pytest
 pylint
 coverage
+pytest-cov
+black
