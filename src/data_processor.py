@@ -1,10 +1,7 @@
-"""
-Module docstring: This module contains the DataProcessor class for processing data from CSV files and web scrapers.
-"""
+# Module docstring: This module contains the DataProcessor class for processing data from CSV files and web scrapers.
 
 import logging
 import pandas as pd
-# Assuming src is a package and these imports work when PYTHONPATH is correctly set
 from src.log_config import setup_logging
 from src.sector_scraper import SectorScraper
 
@@ -17,8 +14,6 @@ class DataProcessor:
     Class for processing data from a CSV file and a web scraper.
     :param file_path: The path to the CSV file.
     :type file_path: str
-    :return: None
-    :rtype: None
     """
 
     def __init__(self, file_path):
@@ -32,8 +27,6 @@ class DataProcessor:
         Process the data from the CSV file and the web scraper and store it in the database.
         :param conn: The database connection.
         :type conn: sqlite3.Connection
-        :return: None
-        :rtype: None
         """
         sector_scraper = SectorScraper(
             "https://www.ibisworld.com/au/list-of-enterprise-profiles/"
@@ -52,7 +45,7 @@ class DataProcessor:
             pd.read_csv(self.file_path).to_sql('LDS_COMPANIES', conn, if_exists='replace', index=False)
             logging.info("Companies data loaded and stored in database.")
         except pd.errors.ParserError as e:
-            logging.error("Failed to process companies data from %s: %s", self.file_path, e)
+            logging.error(f"Failed to process companies data from {self.file_path}: {e}")
 
         company_df = pd.read_sql_query('SELECT * FROM LDS_COMPANIES', conn)
         sector_df = pd.read_sql_query('SELECT * FROM LDS_SECTOR', conn)
