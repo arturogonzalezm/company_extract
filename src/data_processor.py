@@ -45,7 +45,7 @@ class DataProcessor:
             pd.read_csv(self.file_path).to_sql('LDS_COMPANIES', conn, if_exists='replace', index=False)
             logging.info("Companies data loaded and stored in database.")
         except pd.errors.ParserError as e:
-            logging.error(f"Failed to process companies data from {self.file_path}: {e}")
+            logging.error("Failed to process companies data from %s %s:", self.file_path, e)
 
         company_df = pd.read_sql_query('SELECT * FROM LDS_COMPANIES', conn)
         sector_df = pd.read_sql_query('SELECT * FROM LDS_SECTOR', conn)
