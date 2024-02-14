@@ -3,7 +3,7 @@ name: Python CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  test_and_coverage:
     name: Test and Coverage
     runs-on: ubuntu-latest
     strategy:
@@ -49,6 +49,7 @@ jobs:
 
   lint:
     name: Linting with Pylint
+    needs: test_and_coverage  # This ensures linting runs after tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -76,6 +77,6 @@ jobs:
 
       - name: Code Review Scoring
         run: find . -path ./tests -prune -o -name '*.py' -print -exec pylint {} \;
-      - name: Analysing code with PyLint
+      - name: Run PyLint
         run: |
           pylint $(find . -path ./tests -prune -o -name '*.py' -print) --fail-under=8.0
